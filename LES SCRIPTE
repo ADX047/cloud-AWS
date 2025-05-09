@@ -1,32 +1,45 @@
 #!/bin/bash
 
-# === Configuration ===
-# Liste des IP internes des EC2 privées
-PRIVATE_HOSTS=("172.31.25.70" "172.31.25.80")
+echo "===== Supervision de $(hostname) - $(date) ====="
+echo
 
-# Clé privée SSH si nécessaire (décommente si tu utilises un fichier clé dédié)
-# SSH_KEY="/home/ubuntu/.ssh/aws_rsa"
-
-# === Supervision ===
-echo "=== DÉBUT DE SUPERVISION $(date) ==="
-
-for HOST in "${PRIVATE_HOSTS[@]}"; do
-    echo "------ Supervision de $HOST ------"
-    ssh -o StrictHostKeyChecking=no ubuntu@$HOST <<EOF
-echo "[UPTIME]"
+echo "=== Uptime ==="
 uptime
+echo
 
-echo "[ESPACE DISQUE]"
-df -h
+echo "=== Utilisation CPU (1 sec) ==="
+top -bn1 | grep "Cpu(s)"
+echo
 
-echo "[PORTS OUVERTS]"
-netstat -tuln
-EOF
-    echo ""
-done
+echo "=== Utilisation mémoire ==="
+free -h
+echo
 
-echo "=== FIN DE SUPERVISION $(date) ==="
+echo "=== Espace disque monté ==="
+df -h --total
+echo
 
+echo "=== Connexions réseau actives (ports écoutés) ==="
+ss -tuln
+echo
+
+echo "=== Nombre de connexions établies ==="
+ss -s | grep estab
+echo
+
+echo "=== Utilisateurs connectés ==="
+who
+echo
+
+echo "=== Services actifs ==="
+systemctl list-units --type=service --state=running | head -15
+echo
+
+echo "=== Derniers journaux système (10 lignes) ==="
+journalctl -n 10 --no-pager
+echo
+
+echo "=== Fin de supervision ==="
 
 
 
